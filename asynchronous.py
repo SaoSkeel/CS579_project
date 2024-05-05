@@ -1,4 +1,4 @@
-import os
+import random
 from synchronous import RC4_Synchronous
 import threading
 
@@ -32,7 +32,8 @@ class RC4_Asynchronous:
         
     
     def getIV(self, n):
-        return [os.urandom(10) for _ in range(n)]
+        random.seed(43)
+        return [random.randbytes(10) for _ in range(n)]
 
     def decrypt(self, ciphertexts):
         num_blocks = len(ciphertexts)
