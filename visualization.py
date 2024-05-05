@@ -13,7 +13,7 @@ def visualize_performance(num_iterations=10):
     async_dec_times = []
 
     key = b"supersecretkey"
-    plaintext = b"hello world"
+    plaintext = b"hello world,hello worldhello worldhello worldhello worldhello world"
 
     for _ in range(num_iterations):
         enc_time_sync, dec_time_sync = benchmark_performance_sync(RC4_Synchronous, key, plaintext)
@@ -21,7 +21,7 @@ def visualize_performance(num_iterations=10):
         sync_dec_times.append(dec_time_sync)
 
         rc4_async = RC4_Asynchronous(key)
-        enc_time_async, dec_time_async = asyncio.run(benchmark_performance_async(rc4_async, plaintext))
+        enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext)
         async_enc_times.append(enc_time_async)
         async_dec_times.append(dec_time_async)
 
