@@ -1,6 +1,5 @@
 import random
 from synchronous import RC4_Synchronous
-import numpy as np
 
 def main():
   # create a random 256 byte array key
