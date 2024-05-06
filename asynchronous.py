@@ -52,7 +52,7 @@ class RC4_Asynchronous:
 def main():
     key = b"SecretKey"
     rc4 = RC4_Asynchronous(key)
-    plaintext = b"Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!"
+    plaintext = b"Hello, World!"
     encrypted = rc4.encrypt(plaintext, block_size=10)
     decrypted = rc4.decrypt(encrypted)
     print("Plaintext:", plaintext)

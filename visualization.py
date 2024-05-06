@@ -2,9 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from synchronous import RC4_Synchronous
 from asynchronous import RC4_Asynchronous
-from tests_eval import benchmark_performance_sync, benchmark_performance_async
+from tests_eval import benchmark_performance_sync, benchmark_performance_async, generate_large_input, read_large_input
 import asyncio
-
 
 def visualize_performance(num_iterations=10):
     sync_enc_times = []
@@ -13,7 +12,14 @@ def visualize_performance(num_iterations=10):
     async_dec_times = []
 
     key = b"supersecretkey"
-    plaintext = b"hello world,hello worldhello worldhello worldhello worldhello world"
+
+    file_path = "large_input.bin"  # file path
+    size_in_bytes = 1 * 1024 * 1024  # 1 MB, generated file size
+    generate_large_input(file_path, size_in_bytes)
+
+    plaintext = read_large_input(file_path)
+
+    # plaintext = b"hello world,hello worldhello worldhello  world,hello w"
 
     for _ in range(num_iterations):
         enc_time_sync, dec_time_sync = benchmark_performance_sync(RC4_Synchronous, key, plaintext)
@@ -43,4 +49,4 @@ def visualize_performance(num_iterations=10):
 
 
 if __name__ == "__main__":
-    visualize_performance(num_iterations=1000)
+    visualize_performance(num_iterations=10)
