@@ -1,7 +1,8 @@
 import numpy as np
 from synchronous import RC4_Synchronous
-from concurrent.futures import ThreadPoolExecutor
 import random
+import time
+from multiprocessing import Process, Manager
 
 class RC4_Asynchronous:
     def __init__(self, key):
@@ -13,7 +14,7 @@ class RC4_Asynchronous:
         """
         self.key = key
 
-    def encrypt(self, plaintext, block_size=1):
+    def encrypt(self, plaintext, block_size=1, measure_time=False):
         """
         Encrypt the plaintext asynchronously.
 
@@ -25,6 +26,8 @@ class RC4_Asynchronous:
             np.ndarray: An array containing tuples of (IV, encrypted_text).
         """
         num_blocks = (len(plaintext) + block_size - 1) // block_size
+        # debug
+        # print(num_blocks)
 
         # Generate Initialization Vectors (IVs)
         self.ivs = self.getIV(num_blocks)
@@ -40,25 +43,35 @@ class RC4_Asynchronous:
         assert len(self.new_keys) == len(self.broken_plaintext)
 
         # Initialize an array to store outputs
-        self.outputs = np.empty(num_blocks, dtype=object)
+        # self.outputs = np.empty(num_blocks, dtype=object)
+        a = [[bytes(0), bytes(0)]] * num_blocks
+        for i in range(num_blocks):
+            a[i] = [self.ivs[i],bytes(0)]
+        outputs = Manager().list(a)
 
-        # Use ThreadPoolExecutor for parallel execution
-        with ThreadPoolExecutor() as executor:
-            for i in range(num_blocks):
-                executor.submit(self.runParallelEncryption, i)
+        start_time, end_time = 0, 0
+        if measure_time:
+            start_time = time.time()
+        threads = [Process(target=self.runParallelEncryption, args=(i,self.new_keys[i], self.broken_plaintext[i], outputs)) for i in range(num_blocks)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        if measure_time:
+            end_time = time.time()
+        
+        return list(outputs), end_time - start_time
 
-        return self.outputs
-
-    def runParallelEncryption(self, i):
+    def runParallelEncryption(self, i, key, plaintext, outputs):
         """
         Run encryption for a single block in parallel.
 
         Args:
             i (int): Index of the block to be encrypted.
         """
-        cipher = RC4_Synchronous(self.new_keys[i])
-        encrypted = cipher.encrypt(self.broken_plaintext[i])
-        self.outputs[i] = (self.ivs[i], encrypted)
+        cipher = RC4_Synchronous(key)
+        encrypted = cipher.encrypt(plaintext)
+        outputs[i][1] = encrypted
 
     def getIV(self, n):
         """
@@ -73,7 +86,7 @@ class RC4_Asynchronous:
         random.seed(43)
         return [random.randbytes(10) for _ in range(n)]
 
-    def decrypt(self, ciphertexts):
+    def decrypt(self, ciphertexts, measure_time=False):
         """
         Decrypt the ciphertexts asynchronously.
 
@@ -92,32 +105,41 @@ class RC4_Asynchronous:
         self.broken_ciphertexts = np.array([c for _, c in ciphertexts])
 
         # Initialize an array to store outputs
-        self.outputs = np.empty(num_blocks, dtype=object)
+        a = [[bytes(0), bytes(0)]] * num_blocks
+        for i in range(num_blocks):
+            a[i] = [self.ivs[i],bytes(0)]
+        outputs = Manager().list(a)
+        
+        start_time, end_time = 0, 0
+        if measure_time:
+            start_time = time.time()
+        threads = [Process(target=self.runParallelEncryption, args=(i,self.new_keys[i], self.broken_plaintext[i], outputs)) for i in range(num_blocks)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        if measure_time:
+            end_time = time.time()
 
-        # Use ThreadPoolExecutor for parallel execution
-        with ThreadPoolExecutor() as executor:
-            for i in range(num_blocks):
-                executor.submit(self.runParallelDecryption, i)
+        return b''.join([c for _, c in outputs]), end_time - start_time
 
-        return b''.join([c for _, c in self.outputs])
-
-    def runParallelDecryption(self, i):
+    def runParallelDecryption(self, i, key, ciphertext, outputs):
         """
         Run decryption for a single block in parallel.
 
         Args:
             i (int): Index of the block to be decrypted.
         """
-        cipher = RC4_Synchronous(self.new_keys[i])
-        decrypted = cipher.decrypt(self.broken_ciphertexts[i])
-        self.outputs[i] = (self.ivs[i], decrypted)
+        cipher = RC4_Synchronous(key)
+        decrypted = cipher.decrypt(ciphertext)
+        outputs[i][1] = decrypted
 
 def main():
     key = b"SecretKey"
     rc4 = RC4_Asynchronous(key)
     plaintext = b"Hello, World!"
-    encrypted = rc4.encrypt(plaintext, block_size=10)
-    decrypted = rc4.decrypt(encrypted)
+    encrypted, _ = rc4.encrypt(plaintext, block_size=10, measure_time=False)
+    decrypted, _ = rc4.decrypt(encrypted)
     print("Plaintext:", plaintext)
     print(
         f"Encrypted: text - {','.join([e.hex() for _, e in encrypted])}, ivs - {','.join([i.hex() for i, _ in encrypted])}")

@@ -14,7 +14,7 @@ def visualize_performance(num_iterations=10):
     key = b"supersecretkey"
 
     file_path = "large_input.bin"  # file path
-    size_in_bytes = 1 * 1024 * 1024  # 1 MB, generated file size
+    size_in_bytes = 10 * 1024 * 1024  # 10 MB, generated file size
     generate_large_input(file_path, size_in_bytes)
 
     plaintext = read_large_input(file_path)

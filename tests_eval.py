@@ -29,19 +29,13 @@ def benchmark_performance_async(rc4_instance: RC4_Asynchronous, plaintext: bytes
     Measure the encryption and decryption time of RC4 asynchronously.
     """
     # Warm-up run to let threads initialize
-    rc4_instance.encrypt(plaintext, 30)
+    rc4_instance.encrypt(plaintext, (10*1024*1024) // 10)
 
     # Measure encryption time
-    start_encryption = time.time()
-    encrypted = rc4_instance.encrypt(plaintext, 30)
-    end_encryption = time.time()
-    enc_time = end_encryption - start_encryption
+    encrypted, enc_time = rc4_instance.encrypt(plaintext, (10*1024*1024) // 10, measure_time=True)
 
     # Measure decryption time
-    start_decryption = time.time()
-    decrypted = rc4_instance.decrypt(encrypted)
-    end_decryption = time.time()
-    dec_time = end_decryption - start_decryption
+    decrypted, dec_time = rc4_instance.decrypt(encrypted, measure_time=True)
 
     return enc_time, dec_time
 
@@ -57,7 +51,7 @@ if __name__ == "__main__":
     key = b"supersecretkey"
 
     file_path = "large_input.bin"  # Change this to desired file path
-    size_in_bytes = 1 * 1024 * 1024  # 10 MB, change this to desired size
+    size_in_bytes = 10 * 1024 * 1024
 
     generate_large_input(file_path, size_in_bytes)
 
