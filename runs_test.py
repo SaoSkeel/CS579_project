@@ -2,6 +2,7 @@ import random
 from synchronous import RC4_Synchronous
 from math import sqrt, erfc
 
+# Runs test reference: page 27 of https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-22r1a.pdf
 def main():
   random.seed(50)
   n = 10000
@@ -29,6 +30,8 @@ def main():
   print(f'v_obs = {v_obs}')
   
   # compute p-value
+  
+  # set n as number of bits
   n = n*8
   
   p = erfc(abs(v_obs - 2*n*pi*(1-pi))/(2*sqrt(2*n)*pi*(1-pi)))
