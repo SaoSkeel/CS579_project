@@ -28,6 +28,8 @@ def benchmark_performance_async(rc4_instance: RC4_Asynchronous, plaintext: bytes
     """
     Measure the encryption and decryption time of RC4 asynchronously.
     """
+    # Warm-up run to let threads initialize
+    rc4_instance.encrypt(plaintext, 30)
 
     # Measure encryption time
     start_encryption = time.time()

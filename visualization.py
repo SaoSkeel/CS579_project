@@ -44,7 +44,7 @@ def visualize_performance(num_iterations=10):
     plt.bar(labels, avg_times, color=['blue', 'blue', 'orange', 'orange'])
     plt.xlabel('Operations')
     plt.ylabel('Average Time (seconds)')
-    plt.title('Average Encryption and Decryption Time ({} Iterations)'.format(num_iterations))
+    plt.title('Average Encryption and Decryption Time ({} Iterations)(Input file size {}MB)'.format(num_iterations, size_in_bytes/(1024*1024)))
     plt.show()
 
 
