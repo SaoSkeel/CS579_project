@@ -24,15 +24,15 @@ def benchmark_performance_sync(rc4_constructor: Callable, key: bytes, plaintext:
     return enc_time, dec_time
 
 
-def benchmark_performance_async(rc4_instance: RC4_Asynchronous, plaintext: bytes) -> Tuple[float, float]:
+def benchmark_performance_async(rc4_instance: RC4_Asynchronous, plaintext: bytes, block_size: int) -> Tuple[float, float]:
     """
     Measure the encryption and decryption time of RC4 asynchronously.
     """
     # Warm-up run to let threads initialize
-    rc4_instance.encrypt(plaintext, (10*1024*1024) // 10)
+    rc4_instance.encrypt(plaintext, block_size)
 
     # Measure encryption time
-    encrypted, enc_time = rc4_instance.encrypt(plaintext, (10*1024*1024) // 10, measure_time=True)
+    encrypted, enc_time = rc4_instance.encrypt(plaintext, block_size, measure_time=True)
 
     # Measure decryption time
     decrypted, dec_time = rc4_instance.decrypt(encrypted, measure_time=True)
@@ -65,6 +65,6 @@ if __name__ == "__main__":
     print(f"Synchronous Decryption Time: {dec_time_sync}")
 
     rc4_async = RC4_Asynchronous(key)
-    enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext)
+    enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext, 1024 * 1024)
     print(f"Asynchronous Encryption Time: {enc_time_async}")
     print(f"Asynchronous Decryption Time: {dec_time_async}")
