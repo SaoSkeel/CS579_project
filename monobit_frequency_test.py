@@ -2,6 +2,7 @@ import random
 from synchronous import RC4_Synchronous
 from math import sqrt, erfc
 
+# Monobit frequency test reference: page 24 of https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-22r1a.pdf
 def main():
   random.seed(50)
   n = 10000
