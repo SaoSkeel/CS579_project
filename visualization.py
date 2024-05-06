@@ -27,7 +27,7 @@ def visualize_performance(num_iterations=10):
         sync_dec_times.append(dec_time_sync)
 
         rc4_async = RC4_Asynchronous(key)
-        enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext)
+        enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext, (1024*1024)//10)
         async_enc_times.append(enc_time_async)
         async_dec_times.append(dec_time_async)
 
