@@ -44,9 +44,9 @@ class RC4_Asynchronous:
 
         # Initialize an array to store outputs
         # self.outputs = np.empty(num_blocks, dtype=object)
-        a = [[bytes(0), bytes(0)]] * num_blocks
+        a = [Manager().list([bytes(0), bytes(0)])] * num_blocks
         for i in range(num_blocks):
-            a[i] = [self.ivs[i],bytes(0)]
+            a[i] = Manager().list([self.ivs[i],bytes(0)])
         outputs = Manager().list(a)
 
         start_time, end_time = 0, 0
@@ -60,7 +60,7 @@ class RC4_Asynchronous:
         if measure_time:
             end_time = time.time()
         
-        return list(outputs), end_time - start_time
+        return [[a,b] for a, b in list(outputs)], end_time - start_time
 
     def runParallelEncryption(self, i, key, plaintext, outputs):
         """
@@ -105,15 +105,15 @@ class RC4_Asynchronous:
         self.broken_ciphertexts = np.array([c for _, c in ciphertexts])
 
         # Initialize an array to store outputs
-        a = [[bytes(0), bytes(0)]] * num_blocks
+        a = [Manager().list([bytes(0), bytes(0)])] * num_blocks
         for i in range(num_blocks):
-            a[i] = [self.ivs[i],bytes(0)]
+            a[i] = Manager().list([ciphertexts[i][0],bytes(0)])
         outputs = Manager().list(a)
         
         start_time, end_time = 0, 0
         if measure_time:
             start_time = time.time()
-        threads = [Process(target=self.runParallelEncryption, args=(i,self.new_keys[i], self.broken_plaintext[i], outputs)) for i in range(num_blocks)]
+        threads = [Process(target=self.runParallelDecryption, args=(i,self.new_keys[i], self.broken_ciphertexts[i], outputs)) for i in range(num_blocks)]
         for thread in threads:
             thread.start()
         for thread in threads:
@@ -121,7 +121,7 @@ class RC4_Asynchronous:
         if measure_time:
             end_time = time.time()
 
-        return b''.join([c for _, c in outputs]), end_time - start_time
+        return b''.join([c for _, c in list(outputs)]), end_time - start_time
 
     def runParallelDecryption(self, i, key, ciphertext, outputs):
         """

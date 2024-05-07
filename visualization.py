@@ -14,20 +14,20 @@ def visualize_performance(num_iterations=10):
     key = b"supersecretkey"
 
     file_path = "large_input.bin"  # file path
-    size_in_bytes = 1 * 1024 * 1024  # 1 MB, generated file size
+    size_in_bytes = 10 * 1024 * 1024  # 10 MB, generated file size
     generate_large_input(file_path, size_in_bytes)
 
     plaintext = read_large_input(file_path)
 
     # plaintext = b"hello world,hello worldhello worldhello  world,hello w"
 
-    for _ in range(num_iterations):
+    for i in range(num_iterations):
         enc_time_sync, dec_time_sync = benchmark_performance_sync(RC4_Synchronous, key, plaintext)
         sync_enc_times.append(enc_time_sync)
         sync_dec_times.append(dec_time_sync)
 
         rc4_async = RC4_Asynchronous(key)
-        enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext, (1024*1024)//10)
+        enc_time_async, dec_time_async = benchmark_performance_async(rc4_async, plaintext, (10*1024*1024)//10)
         async_enc_times.append(enc_time_async)
         async_dec_times.append(dec_time_async)
 
